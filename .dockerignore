@@ -1,0 +1,9 @@
+mq_data/
+mq_log_data/
+data/
+bin/
+.git/
+.gitignore/
+docker-compose.yml
+README.md
+Makefile

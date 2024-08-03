@@ -1,0 +1,53 @@
+services:
+  db:
+    image: postgres:16
+    ports:
+    - 5432:5432
+    volumes:
+    - ./data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: clai
+      POSTGRES_USER: clai
+      POSTGRES_PASSWORD: clai
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - 5672:5672
+      - 15672:15672
+    volumes:
+      - ./mq_data:/var/lib/rabbitmq
+      - ./mq_log_data:/var/log/rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: clai
+      RABBITMQ_DEFAULT_PASS: clai
+
+  clai:
+    image: clai:latest
+    build:
+      context: .
+      dockerfile: ./Dockerfile.clai
+    ports:
+      - 8080:8080
+    environment:
+      DB_USER: clai
+      DB_PASSWORD: clai
+      DB_HOST: db 
+      DB_PORT: 5432
+      DB_DATABASE: clai
+
+      MQ_USER: clai
+      MQ_PASSWORD: clai
+      MQ_HOST: rabbitmq
+      MQ_PORT: 5672
+  
+  clai-agent:
+    image: clai-agent:latest
+    build:
+      context: .
+      dockerfile: ./Dockerfile.clai-agent
+    environment:
+      MQ_USER: clai
+      MQ_PASSWORD: clai
+      MQ_HOST: rabbitmq
+      MQ_PORT: 5672

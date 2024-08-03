@@ -1,0 +1,8 @@
+bin/
+vendor/
+*.log
+*.tmp
+data/
+.env
+mq_data/
+mq_log_data/
