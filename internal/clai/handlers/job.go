@@ -5,22 +5,22 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/gorilla/mux"
+	"github.com/gin-gonic/gin"
 	"github.com/lukasmetzner/clai/pkg/database"
 	"github.com/lukasmetzner/clai/pkg/models"
 	"github.com/lukasmetzner/clai/pkg/mq"
 	"github.com/rabbitmq/amqp091-go"
 )
 
-func CreateJob(w http.ResponseWriter, r *http.Request) {
+func CreateJob(c *gin.Context) {
 	var job models.Job
-	if err := json.NewDecoder(r.Body).Decode(&job); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+	if err := json.NewDecoder(c.Request.Body).Decode(&job); err != nil {
+		http.Error(c.Writer, err.Error(), http.StatusBadRequest)
 		return
 	}
 
 	if err := database.DB.Create(&job).Error; err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(c.Writer, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
@@ -40,65 +40,79 @@ func CreateJob(w http.ResponseWriter, r *http.Request) {
 			Body:        bytes,
 		},
 	); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(c.Writer, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(job)
+	c.JSON(http.StatusCreated, job)
 }
 
-func GetJobs(w http.ResponseWriter, r *http.Request) {
+func GetJobs(c *gin.Context) {
 	var jobs []models.Job
 	if err := database.DB.Find(&jobs).Error; err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(c.Writer, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(jobs)
+	c.JSON(http.StatusCreated, jobs)
 }
 
-func GetJob(w http.ResponseWriter, r *http.Request) {
-	params := mux.Vars(r)
+func GetJob(c *gin.Context) {
 	var job models.Job
-	if err := database.DB.First(&job, params["id"]).Error; err != nil {
-		http.Error(w, err.Error(), http.StatusNotFound)
+	jobId, exists := c.Params.Get("id")
+
+	if !exists {
+		c.Status(http.StatusBadRequest)
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(job)
+	if err := database.DB.First(&job, jobId).Error; err != nil {
+		http.Error(c.Writer, err.Error(), http.StatusNotFound)
+		return
+	}
+
+	c.JSON(http.StatusCreated, job)
 }
 
-func UpdateJob(w http.ResponseWriter, r *http.Request) {
-	params := mux.Vars(r)
+func UpdateJob(c *gin.Context) {
 	var job models.Job
-	if err := database.DB.First(&job, params["id"]).Error; err != nil {
-		http.Error(w, err.Error(), http.StatusNotFound)
+	jobId, exists := c.Params.Get("id")
+
+	if !exists {
+		c.Status(http.StatusBadRequest)
 		return
 	}
 
-	if err := json.NewDecoder(r.Body).Decode(&job); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+	if err := database.DB.First(&job, jobId).Error; err != nil {
+		http.Error(c.Writer, err.Error(), http.StatusNotFound)
+		return
+	}
+
+	if err := json.NewDecoder(c.Request.Body).Decode(&job); err != nil {
+		http.Error(c.Writer, err.Error(), http.StatusBadRequest)
 		return
 	}
 
 	if err := database.DB.Save(&job).Error; err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(c.Writer, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(job)
+	c.JSON(http.StatusOK, job)
 }
 
-func DeleteJob(w http.ResponseWriter, r *http.Request) {
-	params := mux.Vars(r)
-	if err := database.DB.Delete(&models.Job{}, params["id"]).Error; err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+func DeleteJob(c *gin.Context) {
+	jobId, exists := c.Params.Get("id")
+
+	if !exists {
+		c.Status(http.StatusBadRequest)
 		return
 	}
 
-	w.WriteHeader(http.StatusNoContent)
+	if err := database.DB.Delete(&models.Job{}, jobId).Error; err != nil {
+		http.Error(c.Writer, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	c.Status(http.StatusOK)
 }
