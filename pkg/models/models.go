@@ -21,6 +21,7 @@ type Job struct {
 	ResourceRequest string    `json:"resourceRequest"`
 	Type            JobType   `json:"type"`
 	Script          string    `json:"script" gorm:"type:text"`
+	Requirements    string    `json:"requirements" gorm:"type:text"`
 	RepoURL         string    `json:"repoUrl"`
 }
 

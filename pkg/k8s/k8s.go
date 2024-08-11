@@ -8,12 +8,17 @@ import (
 
 	apiv1 "k8s.io/api/core/v1"
 	"k8s.io/client-go/kubernetes"
-	v1 "k8s.io/client-go/kubernetes/typed/batch/v1"
+	v1 "k8s.io/client-go/kubernetes/typed/core/v1"
+	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/client-go/util/homedir"
 )
 
-var JobClient v1.JobInterface
+var PodClient v1.PodInterface
+var ClientSet *kubernetes.Clientset
+var Config *rest.Config
+
+const Namespace string = apiv1.NamespaceDefault
 
 func Init() {
 	home := filepath.Join(homedir.HomeDir(), ".kube", "config")
@@ -32,7 +37,9 @@ func Init() {
 		log.Printf("%s", err)
 	}
 
-	jobClient := clientset.BatchV1().Jobs(apiv1.NamespaceDefault)
+	podClient := clientset.CoreV1().Pods(apiv1.NamespaceDefault)
 
-	JobClient = jobClient
+	PodClient = podClient
+	ClientSet = clientset
+	Config = config
 }

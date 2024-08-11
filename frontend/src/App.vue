@@ -1,7 +1,8 @@
 <script lang="ts" setup>
 import { onMounted, ref } from 'vue'
 
-const text = ref<string>()
+const script = ref<string>()
+const requirements= ref<string>()
 const items = ref<any[]>();
 
 async function createJob() {
@@ -9,9 +10,10 @@ async function createJob() {
     method: "POST",
     body: JSON.stringify({
       priority: 0,
-      script: text.value,
+      script: script.value,
       type: "script",
-      resourceRequest: "gpu"
+      resourceRequest: "gpu",
+      requirements: requirements.value
     })
   });
   await fetchJobs();
@@ -41,7 +43,12 @@ onMounted(async () => {
   <div>
     <h1>Clai</h1>
     <div>
-      <TextArea class="overflow-scroll max-h-30rem" autoResize cols="80" rows="40" v-model="text" />
+      <label>Script</label>
+      <TextArea class="overflow-scroll max-h-30rem" autoResize cols="80" rows="40" v-model="script" />
+    </div>
+    <div>
+      <label>Requirements.txt</label>
+      <TextArea class="overflow-scroll max-h-30rem" autoResize cols="80" rows="40" v-model="requirements" />
     </div>
     <div>
       <Button label="Queue" @click="createJob" />
