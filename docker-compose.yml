@@ -29,6 +29,9 @@ services:
       dockerfile: ./Dockerfile.clai
     ports:
       - 8080:8080
+    depends_on:
+      - db
+      - rabbitmq
     environment:
       DB_USER: clai
       DB_PASSWORD: clai
@@ -46,8 +49,14 @@ services:
     build:
       context: .
       dockerfile: ./Dockerfile.clai-agent
+    depends_on:
+      - db
+      - rabbitmq
+    volumes:
+      - ~/.kube/config:/root/.kube/config:ro
     environment:
       MQ_USER: clai
       MQ_PASSWORD: clai
       MQ_HOST: rabbitmq
       MQ_PORT: 5672
+      K8S_HOST: kubernetes.docker.internal 
