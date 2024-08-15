@@ -17,19 +17,30 @@ var rootCmd = &cobra.Command{
 	Use:   "clai-cli",
 	Short: "CLI tool to interact with the Clai System",
 	Run: func(cmd *cobra.Command, args []string) {
+		if scriptPath == "" {
+			log.Fatalf("Provide a script path via --script or -s")
+		}
+
 		scriptFile, err := os.ReadFile(scriptPath)
 		if err != nil {
 			log.Fatalf("%s error with the file %s", err, scriptPath)
 		}
 
-		reqFile, err := os.ReadFile(reqPath)
-		if err != nil {
-			log.Fatalf("%s error with the file %s", err, reqPath)
+		reqStr := ""
+
+		if reqPath != "" {
+			reqFile, err := os.ReadFile(reqPath)
+			if err != nil {
+				log.Fatalf("%s error with the file %s", err, reqPath)
+			}
+			reqStr = string(reqFile)
+		} else {
+			log.Println("You did not provide a requirements.txt path!")
 		}
 
 		job := models.JobRequest{
 			Script:       string(scriptFile),
-			Requirements: string(reqFile),
+			Requirements: reqStr,
 			Type:         models.ScriptJob,
 		}
 
