@@ -25,6 +25,12 @@ type Job struct {
 	RepoURL         string    `json:"repoUrl"`
 }
 
+type JobRequest struct {
+	Script       string  `json:"script"`
+	Requirements string  `json:"requirements"`
+	Type         JobType `json:"type"`
+}
+
 func (job *Job) BeforeSave(tx *gorm.DB) (err error) {
 	if job.Type == ScriptJob && job.Script == "" {
 		return fmt.Errorf("script field cannot be empty for script job")

@@ -54,7 +54,7 @@ func GetJobs(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusCreated, jobs)
+	c.JSON(http.StatusOK, jobs)
 }
 
 func GetJob(c *gin.Context) {
@@ -71,7 +71,7 @@ func GetJob(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusCreated, job)
+	c.JSON(http.StatusOK, job)
 }
 
 func UpdateJob(c *gin.Context) {
