@@ -3,11 +3,13 @@ package cli
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
 
 	"github.com/lukasmetzner/clai/pkg/models"
+	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
 )
 
@@ -55,7 +57,17 @@ var rootCmd = &cobra.Command{
 			log.Fatalf("Failed! Response code is %s", res.Status)
 		}
 
-		log.Printf("Script queued for execution")
+		buffer := bytes.Buffer{}
+		buffer.ReadFrom(res.Body)
+
+		var resJob models.Job
+		if err := json.Unmarshal(buffer.Bytes(), &resJob); err != nil {
+			log.Fatalf("%s", err)
+		}
+
+		jobIDStr := fmt.Sprintf("%d", resJob.ID)
+
+		pterm.DefaultBasicText.Println("Your job has been scheduled with the ID: " + pterm.LightMagenta(jobIDStr))
 	},
 }
 

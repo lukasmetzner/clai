@@ -21,13 +21,13 @@ func CreateJob(c *gin.Context) {
 
 	if err := database.DB.Create(&job).Error; err != nil {
 		http.Error(c.Writer, err.Error(), http.StatusInternalServerError)
+		log.Printf("Database error: %s", err)
 		return
 	}
 
 	bytes, err := json.Marshal(job)
-
 	if err != nil {
-		log.Fatalf("%s", err)
+		log.Printf("%s", err)
 	}
 
 	if err := mq.Channel.Publish(
@@ -44,7 +44,7 @@ func CreateJob(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusCreated, job)
+	c.Data(http.StatusCreated, "application/json", bytes)
 }
 
 func GetJobs(c *gin.Context) {

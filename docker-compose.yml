@@ -10,7 +10,7 @@ services:
       POSTGRES_USER: clai
       POSTGRES_PASSWORD: clai
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U user -d mydatabase"]
+      test: ["CMD-SHELL", "pg_isready -U clai -d clai"]
       interval: 30s
       timeout: 10s
       retries: 5
