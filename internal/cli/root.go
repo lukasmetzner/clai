@@ -4,6 +4,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/lukasmetzner/clai/internal/cli/get"
 	"github.com/lukasmetzner/clai/internal/cli/run"
 	"github.com/spf13/cobra"
 )
@@ -15,6 +16,7 @@ var rootCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(run.RunCmd)
+	rootCmd.AddCommand(get.GetCmd)
 }
 
 func Execute() {

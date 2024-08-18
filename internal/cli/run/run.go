@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 
@@ -20,12 +19,14 @@ var RunCmd = &cobra.Command{
 	Short: "Schedule a Python job",
 	Run: func(cmd *cobra.Command, args []string) {
 		if scriptPath == "" {
-			log.Fatalf("Provide a script path via --script or -s")
+			fmt.Printf("Provide a script path via --script or -s")
+			os.Exit(1)
 		}
 
 		scriptFile, err := os.ReadFile(scriptPath)
 		if err != nil {
-			log.Fatalf("%s error with the file %s", err, scriptPath)
+			fmt.Printf("%s error with the file %s", err, scriptPath)
+			os.Exit(1)
 		}
 
 		reqStr := ""
@@ -33,11 +34,12 @@ var RunCmd = &cobra.Command{
 		if reqPath != "" {
 			reqFile, err := os.ReadFile(reqPath)
 			if err != nil {
-				log.Fatalf("%s error with the file %s", err, reqPath)
+				fmt.Printf("%s error with the file %s", err, reqPath)
+				os.Exit(1)
 			}
 			reqStr = string(reqFile)
 		} else {
-			log.Println("You did not provide a requirements.txt path!")
+			fmt.Println("You did not provide a requirements.txt path!")
 		}
 
 		job := models.JobRequest{
@@ -50,11 +52,13 @@ var RunCmd = &cobra.Command{
 		reader := bytes.NewReader(body)
 		res, err := http.Post("http://localhost:8080/api/jobs/", "application/json", reader)
 		if err != nil {
-			log.Fatalf("%s", err)
+			fmt.Printf("%s", err)
+			os.Exit(1)
 		}
 
 		if res.StatusCode != 201 {
-			log.Fatalf("Failed! Response code is %s", res.Status)
+			fmt.Printf("Failed! Response code is %s", res.Status)
+			os.Exit(1)
 		}
 
 		buffer := bytes.Buffer{}
@@ -62,7 +66,8 @@ var RunCmd = &cobra.Command{
 
 		var resJob models.Job
 		if err := json.Unmarshal(buffer.Bytes(), &resJob); err != nil {
-			log.Fatalf("%s", err)
+			fmt.Printf("%s", err)
+			os.Exit(1)
 		}
 
 		jobIDStr := fmt.Sprintf("%d", resJob.ID)

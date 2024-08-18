@@ -66,7 +66,7 @@ func GetJob(c *gin.Context) {
 		return
 	}
 
-	if err := database.DB.First(&job, jobId).Error; err != nil {
+	if err := database.DB.Preload("JobOutput").First(&job, jobId).Error; err != nil {
 		http.Error(c.Writer, err.Error(), http.StatusNotFound)
 		return
 	}

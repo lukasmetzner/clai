@@ -23,6 +23,14 @@ type Job struct {
 	Script          string    `json:"script" gorm:"type:text"`
 	Requirements    string    `json:"requirements" gorm:"type:text"`
 	RepoURL         string    `json:"repoUrl"`
+	JobOutputID     *uint     `json:"job_output_id"`
+	JobOutput       JobOutput `json:"job_output"`
+}
+
+type JobOutput struct {
+	ID     uint   `json:"id" gorm:"primaryKey"`
+	Stdout string `json:"stdout"`
+	Stderr string `json:"stderr"`
 }
 
 type JobRequest struct {

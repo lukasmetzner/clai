@@ -50,6 +50,7 @@ services:
       DB_HOST: db 
       DB_PORT: 5432
       DB_DATABASE: clai
+      DB_AUTOMIGRATE: 1
 
       MQ_USER: clai
       MQ_PASSWORD: clai
@@ -69,8 +70,15 @@ services:
     volumes:
       - ~/.kube/config:/root/.kube/config:ro
     environment:
+      DB_USER: clai
+      DB_PASSWORD: clai
+      DB_HOST: db 
+      DB_PORT: 5432
+      DB_DATABASE: clai
+
       MQ_USER: clai
       MQ_PASSWORD: clai
       MQ_HOST: rabbitmq
       MQ_PORT: 5672
+
       K8S_HOST: kubernetes.docker.internal 

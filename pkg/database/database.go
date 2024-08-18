@@ -1,6 +1,7 @@
 package database
 
 import (
+	"bytes"
 	"fmt"
 	"log"
 	"os"
@@ -49,9 +50,44 @@ func InitDB() {
 	sqlDB.SetMaxOpenConns(100)
 	sqlDB.SetConnMaxLifetime(time.Hour)
 
-	if err := db.AutoMigrate(&models.Job{}); err != nil {
-		log.Fatal("failed to migrate database:", err)
+	automigrate := os.Getenv("DB_AUTOMIGRATE")
+
+	if automigrate == "" {
+		automigrate = "0"
+	}
+
+	if automigrate == "1" {
+		if err := db.AutoMigrate(&models.Job{}); err != nil {
+			log.Fatal("failed to migrate database:", err)
+		}
+
+		if err := db.AutoMigrate(&models.JobOutput{}); err != nil {
+			log.Fatal("failed to migrate database:", err)
+		}
 	}
 
 	DB = db
+}
+
+func AppendJobOutput(jobID uint, stdout *bytes.Buffer, stderr *bytes.Buffer) {
+	var job models.Job
+
+	// Select from jobs where id = jobID
+	if err := DB.First(&job, jobID).Error; err != nil {
+		log.Printf("Error fetching job %d: %s", jobID, err)
+	}
+
+	jobOutput := models.JobOutput{
+		Stdout: stdout.String(),
+		Stderr: stderr.String(),
+	}
+
+	if err := DB.Create(&jobOutput).Error; err != nil {
+		log.Printf("Error creating job output: %s", err)
+	}
+
+	job.JobOutputID = &jobOutput.ID
+	if err := DB.Save(&job).Error; err != nil {
+		log.Printf("Error saving job object: %s", err)
+	}
 }
